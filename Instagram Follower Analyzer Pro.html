@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Instagram Follower Analyzer Pro</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300 selection:bg-rose-500 selection:text-white overflow-x-hidden">
+
+    <!-- Top Centered Glassmorphism Toast Notification (Width ~80% max-w-lg) -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[80%] max-w-lg px-5 py-3 rounded-2xl shadow-2xl bg-slate-900/90 text-white dark:bg-white/90 dark:text-slate-900 text-xs font-semibold flex items-center justify-between space-x-3 transition-all duration-300 opacity-0 -translate-y-4 border border-slate-700 dark:border-slate-200 backdrop-blur-xl">
+        <div class="flex items-center space-x-3 truncate">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm flex-shrink-0"></i>
+            <span id="toastMsg" class="truncate">Action successful</span>
+        </div>
+        <button onclick="hideToast()" class="text-slate-400 hover:text-white dark:hover:text-slate-900 flex-shrink-0">
+            <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+    </div>
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-40 glass-card border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-rose-500/25">
+                <i class="fa-brands fa-instagram text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-sm sm:text-base tracking-tight bg-gradient-to-r from-rose-500 via-pink-600 to-purple-600 bg-clip-text text-transparent">InstaScope Pro</h1>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Professional Follower Intelligence</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button id="themeToggle" aria-label="Toggle Theme" class="p-2 rounded-xl bg-slate-200/70 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all text-slate-600 dark:text-slate-300 focus:outline-none">
+                <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
+            </button>
+            <button onclick="openHelpModal()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-200/70 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center space-x-1 text-slate-700 dark:text-slate-200">
+                <i class="fa-solid fa-circle-question text-rose-500 text-xs"></i>
+                <span class="hidden sm:inline">Guide</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-3 sm:px-6 py-5 sm:py-6 space-y-5">
+
+        <!-- Dynamic Upload Section -->
+        <section class="glass-card rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold tracking-tight">Upload Instagram Data</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Upload <code class="bg-slate-200/80 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[11px] font-mono">following.json</code> and <code class="bg-slate-200/80 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[11px] font-mono">follower_1.json</code> anytime.</p>
+                </div>
+                <button id="resetBtn" onclick="resetAppData()" class="hidden px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all flex items-center justify-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                    <span>Reset All Data</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Following Input Box -->
+                <div class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-rose-500 rounded-xl p-3.5 text-center transition-all bg-slate-50/50 dark:bg-slate-900/40 cursor-pointer" onclick="document.getElementById('followingFile').click()">
+                    <input type="file" id="followingFile" accept=".json" class="hidden" onchange="handleFileUpload('following', event)">
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto mb-2">
+                        <i class="fa-solid fa-user-group text-sm"></i>
+                    </div>
+                    <h3 class="font-semibold text-xs mb-0.5">following.json</h3>
+                    <p id="followingStatus" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Click to browse file</p>
+                    <div id="followingBadge" class="hidden mt-1.5 inline-flex items-center space-x-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                        <i class="fa-solid fa-check"></i> <span>Ready</span>
+                    </div>
+                </div>
+
+                <!-- Followers Input Box -->
+                <div class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-rose-500 rounded-xl p-3.5 text-center transition-all bg-slate-50/50 dark:bg-slate-900/40 cursor-pointer" onclick="document.getElementById('followerFile').click()">
+                    <input type="file" id="followerFile" accept=".json" class="hidden" onchange="handleFileUpload('follower', event)">
+                    <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mx-auto mb-2">
+                        <i class="fa-solid fa-users text-sm"></i>
+                    </div>
+                    <h3 class="font-semibold text-xs mb-0.5">follower_1.json</h3>
+                    <p id="followerStatus" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Click to browse file</p>
+                    <div id="followerBadge" class="hidden mt-1.5 inline-flex items-center space-x-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                        <i class="fa-solid fa-check"></i> <span>Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Centered Action Button -->
+            <div class="mt-5 flex justify-center">
+                <button id="processBtn" onclick="processData()" disabled class="px-6 py-2.5 rounded-xl font-semibold text-xs bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed transition-all flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analyze Relationships Now</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Analytics Dashboard Section -->
+        <div id="dashboardSection" class="space-y-4 hidden">
+            <!-- Summary Stats Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
+                <div class="glass-card rounded-xl p-3 shadow-sm border-l-4 border-l-purple-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Followers</span>
+                        <i class="fa-solid fa-users text-purple-500 text-xs"></i>
+                    </div>
+                    <div class="text-lg sm:text-xl font-black" id="statFollowers">0</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-3 shadow-sm border-l-4 border-l-rose-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Following</span>
+                        <i class="fa-solid fa-user-group text-rose-500 text-xs"></i>
+                    </div>
+                    <div class="text-lg sm:text-xl font-black" id="statFollowing">0</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-3 shadow-sm border-l-4 border-l-amber-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Not Back</span>
+                        <i class="fa-solid fa-user-slash text-amber-500 text-xs"></i>
+                    </div>
+                    <div class="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400" id="statNotFollowingBack">0</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-3 shadow-sm border-l-4 border-l-blue-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Fans</span>
+                        <i class="fa-solid fa-heart text-blue-500 text-xs"></i>
+                    </div>
+                    <div class="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400" id="statFans">0</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-3 shadow-sm border-l-4 border-l-emerald-500 col-span-2 sm:col-span-1">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Mutuals</span>
+                        <i class="fa-solid fa-handshake text-emerald-500 text-xs"></i>
+                    </div>
+                    <div class="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400" id="statMutuals">0</div>
+                </div>
+            </div>
+
+            <!-- Compact Responsive Table Section with Zero Horizontal Scroll -->
+            <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-lg space-y-4">
+                <!-- Navigation Tabs & Search Bar -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3.5">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button onclick="switchTab('notFollowingBack')" id="tabBtn-notFollowingBack" class="px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-rose-500 text-white shadow-md shadow-rose-500/20">
+                            Tidak Followback (<span id="countNotFollowingBack">0</span>)
+                        </button>
+                        <button onclick="switchTab('fans')" id="tabBtn-fans" class="px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700">
+                            Fans (<span id="countFans">0</span>)
+                        </button>
+                        <button onclick="switchTab('mutuals')" id="tabBtn-mutuals" class="px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700">
+                            Mutuals (<span id="countMutuals">0</span>)
+                        </button>
+                    </div>
+
+                    <div class="relative w-full md:w-64">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
+                        </span>
+                        <input type="text" id="searchInput" oninput="handleSearchInput()" placeholder="Search username..." class="w-full pl-9 pr-3 py-2 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all">
+                    </div>
+                </div>
+
+                <!-- Tab Info & Export Options -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div>
+                        <h3 id="currentTabTitle" class="font-bold text-sm sm:text-base">Tidak Followback (Unfollow)</h3>
+                        <p id="currentTabDesc" class="text-[11px] text-slate-500 dark:text-slate-400">Akun yang Anda ikuti namun tidak mengikuti balik.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="generateListExport('csv')" class="px-3.5 py-1.5 text-[11px] font-semibold rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 transition-all flex items-center space-x-1.5 shadow-sm">
+                            <i class="fa-solid fa-file-csv"></i>
+                            <span>Generate CSV</span>
+                        </button>
+                        <button onclick="generateListExport('txt')" class="px-3.5 py-1.5 text-[11px] font-semibold rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 transition-all flex items-center space-x-1.5 shadow-sm">
+                            <i class="fa-regular fa-file-lines"></i>
+                            <span>Generate TXT</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Compact Table (Fixed Table Layout to Prevent Horizontal Scrolling) -->
+                <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm bg-white/50 dark:bg-slate-900/50 overflow-hidden">
+                    <table class="w-full text-left border-collapse table-fixed">
+                        <thead>
+                            <tr class="bg-slate-100/80 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                                <th class="py-2.5 px-3 w-12 text-center">No</th>
+                                <th class="py-2.5 px-3 w-auto">Username</th>
+                                <th class="py-2.5 px-3 w-36 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody" class="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-xs font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden py-10 text-center space-y-2">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto text-base">
+                        <i class="fa-solid fa-face-smile"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-300">Tidak ada akun ditemukan.</p>
+                </div>
+
+                <!-- Strict 20 Items Pagination & Centered Numbered Controls -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                    <div id="paginationInfo" class="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-center sm:text-left">
+                        Showing 0 of 0
+                    </div>
+                    <div id="paginationControls" class="flex items-center space-x-1 flex-wrap justify-center">
+                        <!-- Pagination controls generated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-3">
+        <div class="glass-card max-w-md w-full rounded-2xl p-5 shadow-2xl relative space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm">Cara Export Data Instagram</h3>
+                <button onclick="closeHelpModal()" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+            <div class="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                <div class="flex items-start space-x-2.5">
+                    <div class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center flex-shrink-0 text-[10px] font-bold">1</div>
+                    <p>Buka Instagram &rarr; Pengaturan &rarr; <span class="font-semibold text-slate-900 dark:text-white">Unduh informasi Anda</span>.</p>
+                </div>
+                <div class="flex items-start space-x-2.5">
+                    <div class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center flex-shrink-0 text-[10px] font-bold">2</div>
+                    <p>Pilih format <span class="font-semibold text-slate-900 dark:text-white">JSON</span> untuk format data.</p>
+                </div>
+                <div class="flex items-start space-x-2.5">
+                    <div class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center flex-shrink-0 text-[10px] font-bold">3</div>
+                    <p>Ambil file <code class="bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono text-[10px]">following.json</code> dan <code class="bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono text-[10px]">follower_1.json</code>.</p>
+                </div>
+            </div>
+            <div class="pt-1 flex justify-end">
+                <button onclick="closeHelpModal()" class="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white font-semibold text-xs rounded-xl shadow-md transition-all">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        let rawFollowingData = null;
+        let rawFollowerData = null;
+        
+        let followingList = new Set();
+        let followerList = new Set();
+
+        let notFollowingBackList = [];
+        let fansList = [];
+        let mutualsList = [];
+
+        let currentActiveTab = 'notFollowingBack';
+        let currentPage = 1;
+        const rowsPerPage = 20;
+        let searchQuery = '';
+        let toastTimeout = null;
+
+        // Theme Manager
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeIcon.className = 'fa-solid fa-sun text-xs';
+        } else {
+            document.documentElement.classList.remove('dark');
+            themeIcon.className = 'fa-solid fa-moon text-xs';
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                themeIcon.className = 'fa-solid fa-moon text-xs';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                themeIcon.className = 'fa-solid fa-sun text-xs';
+            }
+        });
+
+        function openHelpModal() { document.getElementById('helpModal').classList.remove('hidden'); }
+        function closeHelpModal() { document.getElementById('helpModal').classList.add('hidden'); }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+
+            toastMsg.innerText = message;
+            toastIcon.className = isError ? 'fa-solid fa-circle-exclamation text-rose-400 text-sm flex-shrink-0' : 'fa-solid fa-circle-check text-emerald-400 text-sm flex-shrink-0';
+
+            toast.classList.remove('hidden');
+            // Force reflow
+            void toast.offsetWidth;
+            toast.classList.remove('-translate-y-4', 'opacity-0');
+
+            toastTimeout = setTimeout(() => {
+                hideToast();
+            }, 3500);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('-translate-y-4', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 300);
+        }
+
+        function handleFileUpload(type, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (type === 'following') {
+                        rawFollowingData = json;
+                        document.getElementById('followingStatus').innerText = file.name;
+                        document.getElementById('followingBadge').classList.remove('hidden');
+                        showToast('following.json loaded successfully');
+                    } else {
+                        rawFollowerData = json;
+                        document.getElementById('followerStatus').innerText = file.name;
+                        document.getElementById('followerBadge').classList.remove('hidden');
+                        showToast('follower_1.json loaded successfully');
+                    }
+                    checkReadyToProcess();
+                } catch (err) {
+                    showToast('Invalid JSON format! Please upload valid Instagram JSON files.', true);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function checkReadyToProcess() {
+            const btn = document.getElementById('processBtn');
+            if (rawFollowingData && rawFollowerData) {
+                btn.disabled = false;
+                btn.className = 'px-6 py-2.5 rounded-xl font-semibold text-xs bg-gradient-to-r from-rose-500 to-purple-600 text-white hover:opacity-95 shadow-lg shadow-rose-500/25 transition-all flex items-center justify-center space-x-2 cursor-pointer';
+            }
+        }
+
+        function resetAppData() {
+            rawFollowingData = null;
+            rawFollowerData = null;
+            followingList.clear();
+            followerList.clear();
+            notFollowingBackList = [];
+            fansList = [];
+            mutualsList = [];
+            currentActiveTab = 'notFollowingBack';
+            currentPage = 1;
+            searchQuery = '';
+
+            document.getElementById('followingFile').value = '';
+            document.getElementById('followerFile').value = '';
+            document.getElementById('followingStatus').innerText = 'Click to browse file';
+            document.getElementById('followingBadge').classList.add('hidden');
+            document.getElementById('followerStatus').innerText = 'Click to browse file';
+            document.getElementById('followerBadge').classList.add('hidden');
+            document.getElementById('searchInput').value = '';
+            
+            const btn = document.getElementById('processBtn');
+            btn.disabled = true;
+            btn.className = 'px-6 py-2.5 rounded-xl font-semibold text-xs bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed transition-all flex items-center justify-center space-x-2';
+
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('resetBtn').classList.add('hidden');
+            showToast('Application and data successfully reset');
+        }
+
+        function processData() {
+            try {
+                followingList.clear();
+                followerList.clear();
+
+                let followingArray = rawFollowingData.relationships_following || rawFollowingData;
+                if (Array.isArray(followingArray)) {
+                    followingArray.forEach(item => {
+                        const val = item.string_list_data?.[0]?.value || item.title || item.username;
+                        if (val) followingList.add(val);
+                    });
+                }
+
+                let followerArray = Array.isArray(rawFollowerData) ? rawFollowerData : (rawFollowerData.relationships_followers || []);
+                followerArray.forEach(item => {
+                    const val = item.string_list_data?.[0]?.value || item.title || item.username;
+                    if (val) followerList.add(val);
+                });
+
+                notFollowingBackList = [];
+                fansList = [];
+                mutualsList = [];
+
+                followingList.forEach(username => {
+                    if (!followerList.has(username)) notFollowingBackList.push(username);
+                    else mutualsList.push(username);
+                });
+
+                followerList.forEach(username => {
+                    if (!followingList.has(username)) fansList.push(username);
+                });
+
+                document.getElementById('statFollowers').innerText = followerList.size;
+                document.getElementById('statFollowing').innerText = followingList.size;
+                document.getElementById('statNotFollowingBack').innerText = notFollowingBackList.length;
+                document.getElementById('statFans').innerText = fansList.length;
+                document.getElementById('statMutuals').innerText = mutualsList.length;
+
+                document.getElementById('countNotFollowingBack').innerText = notFollowingBackList.length;
+                document.getElementById('countFans').innerText = fansList.length;
+                document.getElementById('countMutuals').innerText = mutualsList.length;
+
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                document.getElementById('resetBtn').classList.remove('hidden');
+                document.getElementById('dashboardSection').scrollIntoView({ behavior: 'smooth' });
+
+                currentPage = 1;
+                renderActiveTabContent();
+                showToast('Relationships successfully analyzed!');
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to parse JSON file structure.', true);
+            }
+        }
+
+        function switchTab(tabName) {
+            currentActiveTab = tabName;
+            currentPage = 1;
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            
+            ['notFollowingBack', 'fans', 'mutuals'].forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                if (t === tabName) {
+                    btn.className = 'px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-rose-500 text-white shadow-md shadow-rose-500/20';
+                } else {
+                    btn.className = 'px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700';
+                }
+            });
+
+            const titleElem = document.getElementById('currentTabTitle');
+            const descElem = document.getElementById('currentTabDesc');
+
+            if (tabName === 'notFollowingBack') {
+                titleElem.innerText = 'Tidak Followback (Unfollow)';
+                descElem.innerText = 'Akun yang Anda ikuti namun tidak mengikuti balik.';
+            } else if (tabName === 'fans') {
+                titleElem.innerText = 'Fans (Followers yang belum Anda ikuti)';
+                descElem.innerText = 'Akun yang mengikuti Anda, namun belum Anda ikuti balik.';
+            } else if (tabName === 'mutuals') {
+                titleElem.innerText = 'Mutual Followers';
+                descElem.innerText = 'Akun yang saling mengikuti satu sama lain.';
+            }
+
+            renderActiveTabContent();
+        }
+
+        function handleSearchInput() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            currentPage = 1;
+            renderActiveTabContent();
+        }
+
+        function getFilteredDataset() {
+            let dataset = [];
+            if (currentActiveTab === 'notFollowingBack') dataset = notFollowingBackList;
+            else if (currentActiveTab === 'fans') dataset = fansList;
+            else if (currentActiveTab === 'mutuals') dataset = mutualsList;
+
+            if (!searchQuery) return dataset;
+            return dataset.filter(username => username.toLowerCase().includes(searchQuery));
+        }
+
+        function renderActiveTabContent() {
+            const dataset = getFilteredDataset();
+            const totalItems = dataset.length;
+            const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
+            const paginatedItems = dataset.slice(startIndex, endIndex);
+
+            const tbody = document.getElementById('userTableBody');
+            const emptyState = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            if (totalItems === 0) {
+                emptyState.classList.remove('hidden');
+                document.getElementById('paginationInfo').innerText = `Showing 0 of 0`;
+                document.getElementById('paginationControls').innerHTML = '';
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            paginatedItems.forEach((username, index) => {
+                const absoluteIndex = startIndex + index + 1;
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-100/60 dark:hover:bg-slate-900/60 transition-colors';
+                
+                let actionButtonHtml = '';
+                const profileUrl = `https://www.instagram.com/${username}`;
+
+                if (currentActiveTab === 'notFollowingBack') {
+                    actionButtonHtml = `
+                        <div class="flex justify-center w-full">
+                            <a href="${profileUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-[11px] font-semibold shadow-sm transition-all inline-flex items-center justify-center space-x-1">
+                                <span>Unfollow</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                            </a>
+                        </div>
+                    `;
+                } else if (currentActiveTab === 'fans') {
+                    actionButtonHtml = `
+                        <div class="flex justify-center w-full">
+                            <a href="${profileUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-purple-500 hover:bg-purple-600 text-white text-[11px] font-semibold shadow-sm transition-all inline-flex items-center justify-center space-x-1">
+                                <span>Follow</span>
+                                <i class="fa-solid fa-user-plus text-[9px]"></i>
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    actionButtonHtml = `
+                        <div class="flex justify-center w-full">
+                            <a href="${profileUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-semibold transition-all inline-flex items-center justify-center space-x-1">
+                                <span>Profile</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                            </a>
+                        </div>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 text-[11px] text-slate-400 font-semibold text-center">${absoluteIndex}</td>
+                    <td class="py-2.5 px-3 font-semibold text-xs truncate">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-rose-400 to-purple-500 flex items-center justify-center text-white text-[10px] font-bold uppercase flex-shrink-0">
+                                ${username.charAt(0)}
+                            </div>
+                            <span class="truncate" title="@${username}">@${username}</span>
+                        </div>
+                    </td>
+                    <td class="py-2.5 px-3 text-center">${actionButtonHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('paginationInfo').innerText = `Showing ${startIndex + 1}-${endIndex} of ${totalItems}`;
+            renderPaginationControls(totalPages);
+        }
+
+        function renderPaginationControls(totalPages) {
+            const controlsContainer = document.getElementById('paginationControls');
+            controlsContainer.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Prev Button
+            const prevBtn = document.createElement('button');
+            prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left text-[10px]"></i>';
+            prevBtn.className = `px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${currentPage === 1 ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 border-slate-200 dark:border-slate-800 cursor-not-allowed' : 'bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'}`;
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderActiveTabContent(); } };
+            controlsContainer.appendChild(prevBtn);
+
+            // Numbered Buttons
+            let startPage = Math.max(1, currentPage - 1);
+            let endPage = Math.min(totalPages, startPage + 2);
+            if (endPage - startPage < 2) startPage = Math.max(1, endPage - 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                if (i === currentPage) {
+                    btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-rose-500 to-purple-600 text-white shadow-sm';
+                } else {
+                    btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition-all';
+                }
+                btn.onclick = () => { currentPage = i; renderActiveTabContent(); };
+                controlsContainer.appendChild(btn);
+            }
+
+            // Next Button
+            const nextBtn = document.createElement('button');
+            nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right text-[10px]"></i>';
+            nextBtn.className = `px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${currentPage === totalPages ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 border-slate-200 dark:border-slate-800 cursor-not-allowed' : 'bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'}`;
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderActiveTabContent(); } };
+            controlsContainer.appendChild(nextBtn);
+        }
+
+        function generateListExport(format) {
+            const dataset = getFilteredDataset();
+            if (dataset.length === 0) {
+                showToast('No data available to export', true);
+                return;
+            }
+
+            let fileContent = '';
+            let mimeType = '';
+            let extension = '';
+
+            if (format === 'csv') {
+                fileContent = 'No,Username,Profile_URL,Status\n';
+                dataset.forEach((username, idx) => {
+                    fileContent += `${idx + 1},${username},https://www.instagram.com/${username},${currentActiveTab}\n`;
+                });
+                mimeType = 'text/csv;charset=utf-8;';
+                extension = 'csv';
+            } else {
+                fileContent = `=== INSTAGRAM REPORT: ${currentActiveTab.toUpperCase()} (${dataset.length} accounts) ===\n\n`;
+                dataset.forEach((username, idx) => {
+                    fileContent += `${idx + 1}. @${username} (https://www.instagram.com/${username})\n`;
+                });
+                mimeType = 'text/plain;charset=utf-8;';
+                extension = 'txt';
+            }
+
+            const blob = new Blob([fileContent], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `instagram_${currentActiveTab}_${Date.now()}.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`Generated and downloaded ${currentActiveTab}.${extension} successfully`);
+        }
+    </script>
+</body>
+</html>
